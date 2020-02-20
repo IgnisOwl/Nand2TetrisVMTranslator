@@ -3,12 +3,35 @@ class Dictionary:
     def __init__(self):
         self.util = Utils()
         
-    def push(self, value):
-        template = ("""
-@%d
-D=A""" % (value))
+    def push(self, value, loc = "none", fileName = "Source"):
+        loc = loc.lower()
         
-        template = template + self.util.IncStackPointer()
+        if(loc == "none"):
+            template = ("""
+@%d
+D=A
+%s
+A=M-1
+M=D
+""" % (value, self.util.IncStackPointer()))    
+        elif(loc == "local"):
+            template = ("""
+@%d
+D=A
+@LCL
+D=M
+%s
+A=M-1
+M=D
+""" % (value, self.util.IncStackPointer()))
+        elif(loc == "static"):
+            template = ("""
+@%s.%d
+D=A
+%s
+A=M-1
+M=D
+""" % (fileName, value, self.util.IncStackPointer()))
 
         return(self.util.fixWhitelines(template))
 
@@ -18,19 +41,21 @@ class Utils:
         return("""
 @SP
 M=M+1
-A=M-1
-M=D""")
+""")
 
     def fixWhitelines(self, text):
-        #removes any line with empty lines, https://stackoverflow.com/questions/3711856/how-to-remove-empty-lines-with-or-without-whitespace-in-python
-        text = text.split("\n")
-        for lineIndex in range(len(text)):
-            if re.match(r'^\s*$', line):
-                
-                
-        text = "".join(text)
-        print(text)
+        #removes any line with empty lines, would use regex but lazy
+        text = text.split()
+        newText = ""
+
+        for line in text:
+            newText = newText + line.strip() + "\n"
+            
+        newText = newText.strip() #remove the end space
+        return(newText)
 
 
-d = Dictionary()
-print(d.push(5))
+if(__name__ == "__main__"):
+    d = Dictionary()
+    print(d.push(2, "local"))
+
