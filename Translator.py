@@ -22,13 +22,14 @@ class Translator:
         newLine = "\n"
     
         for line in source:
-            vals = []
+            vals = ["none", "Source"] #default values
+            
             if(self.parser.type(line)[0] == "push"):
-                if(self.parser.type(line)[1] == None):
-                    vals.append(self.parser.values(line)[0])
+                if(self.parser.type(line)[1] != None):
+                    vals[0] = (self.parser.values(line)[0])
                 
                 
-                translated = translated + dictionary.push(vals)
+                translated = translated + dictionary.push(line, vals[0], vals[1])
     
 
                
