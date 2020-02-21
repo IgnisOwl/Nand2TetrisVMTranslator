@@ -2,12 +2,35 @@
 
 import TranslationDictionary
 
-dictionary = TranslationDictionary.Dictionary()
 sourceFile = "source.vm"
 
+class Parser:
+    def type(self, line):
+        return("push", None)
+    
+    def values(self, line):
+        return(0)
+    
+class Translator:
+    def __init__():
+        self.dictionary = TranslationDictionary.Dictionary(this)
+        self.parser = Paser(this)
+        
+     
+    def translate(self, source):
+        translated = ""
+        newLine = "\n"
+    
+        for line in source:
+            vals = []
+            if(self.parser.type(line)[0] == "push"):
+                if(self.parser.type(line)[1] == None):
+                    vals.append(self.parser.values(line)[0])
+                
+                
+                translated = translated + dictionary.push(vals)
+    
 
-if(__name__ == "__main__"):
-    source = open(sourceFile, "r").readlines()
-    for line in source:
-        print(line)
-    print(dictionary.push(2))
+               
+source = open(sourceFile, "r").readlines()
+print(dictionary.push(2))
