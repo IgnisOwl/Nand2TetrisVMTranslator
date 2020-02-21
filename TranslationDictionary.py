@@ -3,7 +3,7 @@ class Dictionary:
     def __init__(self):
         self.util = Utils()
         
-    def push(self, value, loc = "none", fileName = "Source"):
+    def push(self, value, loc = "none", fileName = "Source"): #loc is the target location, aka like static local etc...
         loc = loc.lower()
         
         if(loc == "none"):
