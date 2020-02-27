@@ -13,7 +13,8 @@ D=A
 %s
 A=M-1
 M=D
-""" % (value, self.util.IncStackPointer()))    
+""" % (value, self.util.IncStackPointer()))
+            
         elif(loc == "local"):
             template = ("""
 @%d
@@ -24,6 +25,18 @@ D=M
 A=M-1
 M=D
 """ % (value, self.util.IncStackPointer()))
+            
+        elif(loc == "argument"):
+            template = ("""
+@%d
+D=A
+@ARG
+D=M
+%s
+A=M-1
+M=D
+""" % (value, self.util.IncStackPointer()))
+            
         elif(loc == "static"):
             template = ("""
 @%s.%d
@@ -57,5 +70,5 @@ M=M+1
 
 if(__name__ == "__main__"):
     d = Dictionary()
-    print(d.push(2, "local"))
+    print(d.push(2, "argument"))
 

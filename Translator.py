@@ -29,7 +29,7 @@ class Parser:
             else:
                 vals.append(chunk)
 
-        print(vals)
+        return(vals)
     
 class Translator:
     def __init__(self):
@@ -42,15 +42,17 @@ class Translator:
         newLine = "\n"
     
         for line in source:
-            vals = ["none", "Source"] #default values
+            vals = [None, "Source", 0] #default values
 
             if(self.parser.type(line)[0] == "push"):
-                if(self.parser.type(line)[1] != None):
+                if(self.parser.type(line)[1] != None): #if like local static etc...
                     vals[0] = (self.parser.values(line)[0])
-                else:
+                    vals[2] = (self.parser.values(line)[0])
+                else: #if it just pushes to stack
                     vals[0] = (self.parser.values(line)[0])
-                
-                translated = translated + self.dictionary.push(vals[0])
+                    vals[2] = (self.parser.values(line)[1])
+
+                translated = translated + self.dictionary.push(vals[2]) #Pass the target push location and number
 
         return(translated)
     
