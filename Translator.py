@@ -4,9 +4,26 @@ import TranslationDictionary
 
 sourceFile = "source.vm"
 
+#cmd constants(could use a dictionary as well)
+PUSH = "push"
+POP = "pop"
+
 class Parser:
     def type(self, line):
-        return("push", None)
+        line = self.split(line)
+        cmd = line[0].lower() #the command should always be lowercase, if it's not make it
+
+        if(len(line) == 2):
+            return(cmd, None)
+
+        elif(len(line) == 3):
+            if(cmd == PUSH):
+                pushT = line[1]
+                return(cmd, pushT)
+
+            elif(cmd == POP):
+                popT = line[1]
+                return(cmd, popT)
 
     def split(self, line): #splits a line based on whitespaces
         return(line.split())
@@ -42,17 +59,29 @@ class Translator:
         newLine = "\n"
     
         for line in source:
-            vals = [None, "Source", 0] #default values
-
-            if(self.parser.type(line)[0] == "push"):
+            vals = ["Source", 0, None] #holds values Filename, target, subtype(for like pushing if its for example a static local etc)
+            if(self.parser.type(line)[0] == PUSH):
                 if(self.parser.type(line)[1] != None): #if like local static etc...
-                    vals[0] = (self.parser.values(line)[0])
-                    vals[2] = (self.parser.values(line)[0])
-                else: #if it just pushes to stack
-                    vals[0] = (self.parser.values(line)[0])
+                    vals[1] = (self.parser.values(line)[2])
                     vals[2] = (self.parser.values(line)[1])
 
-                translated = translated + self.dictionary.push(vals[2]) #Pass the target push location and number
+                    translated = translated + self.dictionary.push(vals[1], vals[2], vals[0])
+                else: #if it just pushes to stack
+                    vals[1] = (self.parser.values(line)[1])
+                
+                    translated = translated + self.dictionary.push(vals[1])
+
+            elif(self.parser.type(line)[0] == POP):
+                if(self.parser.type(line)[1] != None): #if like local static etc...
+                    vals[1] = (self.parser.values(line)[2])
+                    vals[2] = (self.parser.values(line)[1])
+
+                    translated = translated + self.dictionary.pop(vals[1], vals[2], vals[0])
+                else: #if it just pops directly to the target
+                    vals[1] = (self.parser.values(line)[1])
+                
+                    translated = translated + self.dictionary.pop(vals[1])
+
 
         return(translated)
     
