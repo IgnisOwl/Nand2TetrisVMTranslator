@@ -10,14 +10,25 @@ POP = "pop"
 LABEL = "label"
 ADD = "add"
 SUB = "sub"
-
+NEGATE = "neg"
+#perhaps in the future have a better way to handle logical operations, like make them each sub types similar to how push has
+EQ = "eq"
+GREATER_THAN = "gt"
+LESS_THAN = "lt"
+#bitwise:
+AND = "and"
+OR = "or"
+NOT = "not"
 
 class Parser:
     def type(self, line):
         line = self.split(line)
         cmd = line[0].lower() #the command should always be lowercase, if it's not make it
 
-        if(len(line) == 2):
+        if(len(line) == 1):
+            return(cmd, None)
+
+        elif(len(line) == 2):
             return(cmd, None)
 
         elif(len(line) == 3):
@@ -92,9 +103,37 @@ class Translator:
 
                 translated = translated + self.dictionary.label(vals[1])
 
-        return(translated)
-    
+            elif(self.parser.type(line)[0] == ADD):
+                translated = translated + self.dictionary.add()
+            
+            elif(self.parser.type(line)[0] == SUB):
+                translated = translated + self.dictionary.sub()
 
+            elif(self.parser.type(line)[0] == NEGATE):
+                translated = translated + self.dictionary.negate()
+
+            elif(self.parser.type(line)[0] == EQ):
+                translated = translated + self.dictionary.eq()
+
+            elif(self.parser.type(line)[0] == GREATER_THAN):
+                translated = translated + self.dictionary.greater_than()
+                
+            elif(self.parser.type(line)[0] == LESS_THAN):
+                translated = translated + self.dictionary.less_than()
+
+            elif(self.parser.type(line)[0] == AND):
+                translated = translated + self.dictionary.and_()
+
+            elif(self.parser.type(line)[0] == OR):
+                translated = translated + self.dictionary.or_()
+
+            elif(self.parser.type(line)[0] == NOT):
+                translated = translated + self.dictionary.not_()
+
+
+
+        return(translated + self.dictionary.util.programSuffix())
+    
                
 source = open(sourceFile, "r").readlines()
 translator = Translator()

@@ -1,24 +1,9 @@
 #this is a list of translation temlates for different vm codes
-#register constants
-R0 = SP = 0
-R1 = LCL = 1
-R2 = ARG = 2
-R3 = THIS = PTR = 3
-R4 = THAT = 4
-R5 = TEMP = 5
-R6 = 6
-R7 = 7
-R8 = 8
-R9 = 9
-R10 = 10
-R11 = 11
-R12 = 12
-R13 = FRAME = 13
-R14 = RET   = 14
-R15 = COPY  = 15
 
 END_INSTRUCTION_CHAR = "\n//next instruction\n"
+CURRENT_UTIL_JUMP_INDEX = 0 #used for stuff like logic labels
 
+#NOTE: these are not at all the most efficient ways of doing things, also I could probably make it so some more work is done in the translator, such as with popping and pushing the pointers having the translator figure out the ram[offset+3] instead of it being handled by the assembler
 class Dictionary:
     def __init__(self):
         self.util = Utils()
@@ -26,7 +11,7 @@ class Dictionary:
     def push(self, value, loc = "none", fileName = "Source"): #loc is the target location, aka like static local etc...
         loc = loc.lower() #make the push type lowercase
         
-        if(loc == "none"):
+        if(loc == "none" or loc == "constant"):
             template = ("""
 @%s
 D=A
@@ -65,6 +50,31 @@ D=A
 A=M-1
 M=D
 """ % (fileName, value, self.util.IncStackPointer()))
+            
+        elif(loc == "pointer"):
+            template = ("""
+@3
+D=A
+@%s
+A=D+A
+D=M
+%s
+A=M-1
+M=D
+""" % (value, self.util.IncStackPointer()))
+
+        elif(loc == "temp"):
+            template = ("""
+@5
+D=A
+@%s
+A=D+A
+D=M
+%s
+A=M-1
+M=D
+""" % (value, self.util.IncStackPointer()))
+
         return(self.util.fixWhitelines(template))
 
 #POP:
@@ -72,15 +82,10 @@ M=D
         loc = loc.lower()
         value = str(value)
         
-        if(loc == "none"):
+        if(loc == "none" or loc == "constant"):
             template = ("""
 %s
-@SP
-A=M
-M=D
-@%s
-M=D
-""" % (self.util.DecStackPointer(), value))
+""" % (self.util.DecStackPointer()))
             
         elif(loc == "local"):
             template = ("""
@@ -98,7 +103,7 @@ D=M
 @R13
 A=M
 M=D
-""" % (self.util.IncStackPointer(), value))
+""" % (self.util.DecStackPointer(), value))
             
         elif(loc == "argument"):
             template = ("""
@@ -116,7 +121,7 @@ D=M
 @R13
 A=M
 M=D
-""" % (self.util.IncStackPointer(), value))
+""" % (self.util.DecStackPointer(), value))
             
         elif(loc == "static"):
             template = ("""
@@ -134,7 +139,41 @@ D=M
 @R13
 A=M
 M=D
-""" % (self.util.IncStackPointer(), fileName, value))
+""" % (self.util.DecStackPointer(), fileName, value))
+
+        elif(loc == "pointer"):
+            template = ("""
+%s
+@3
+D=A
+@%s
+D=D+A
+@R13
+M=D
+@SP
+A=M
+D=M
+@R13
+A=M
+M=D
+""" % (self.util.DecStackPointer(), value))
+
+        elif(loc == "temp"):
+            template = ("""
+%s
+@5
+D=A
+@%s
+D=D+A
+@R13
+M=D
+@SP
+A=M
+D=M
+@R13
+A=M
+M=D
+""" % (self.util.DecStackPointer(), value))
 
         return(self.util.fixWhitelines(template))
 
@@ -142,6 +181,182 @@ M=D
         template = ("""
 (%s)
 """ % (value))
+
+        return(self.util.fixWhitelines(template))
+
+    def add(self):
+        template = ("""
+@SP
+A=M-1
+D=M
+@SP
+A=M-1
+A=A-1
+D=M+D
+M=D
+%s
+""" % (self.util.DecStackPointer()))
+        return(self.util.fixWhitelines(template))
+
+    def sub(self):
+        template = ("""
+@SP
+A=M-1
+D=M
+@SP
+A=M-1
+A=A-1
+D=M-D
+M=D
+%s
+""" % (self.util.DecStackPointer()))
+        return(self.util.fixWhitelines(template))
+
+    def negate(self):
+        self.util.increaseJumpIndex()
+
+        template = ("""
+%s
+@SP
+A=M
+D=M
+D=-D
+@SP
+A=M
+M=D
+%s
+""" % (self.util.DecStackPointer(), self.util.IncStackPointer()))
+
+        return(self.util.fixWhitelines(template))
+
+    def eq(self):
+        self.util.increaseJumpIndex()
+        #note: lgl stands for logic jump label
+        template = ("""
+@SP
+M=M-1
+A=M
+D=M
+A=A-1
+D=M-D
+@LJL%s
+D;JEQ
+@SP
+A=M-1
+M=0
+@LJL%s
+0;JMP
+(LJL%s)
+@SP
+A=M-1
+M=-1
+(LJL%s)
+""" % (self.util.getCurrentJumpIndex()-1, self.util.getCurrentJumpIndex(), self.util.getCurrentJumpIndex()-1, self.util.getCurrentJumpIndex()))
+
+        return(self.util.fixWhitelines(template))
+
+    def greater_than(self):
+        self.util.increaseJumpIndex()
+
+        template = ("""
+@SP
+M=M-1
+A=M
+D=M
+A=A-1
+D=M-D
+@LJL%s
+D;JGT
+@SP
+A=M-1
+M=0
+@LJL%s
+0;JMP
+(LJL%s)
+@SP
+A=M-1
+M=-1
+(LJL%s)
+""" % (self.util.getCurrentJumpIndex()-1, self.util.getCurrentJumpIndex(), self.util.getCurrentJumpIndex()-1, self.util.getCurrentJumpIndex()))
+
+        return(self.util.fixWhitelines(template))
+
+    def greater_than(self):
+        self.util.increaseJumpIndex()
+
+        template = ("""
+@SP
+M=M-1
+A=M
+D=M
+A=A-1
+D=M-D
+@LJL%s
+D;JLT
+@SP
+A=M-1
+M=0
+@LJL%s
+0;JMP
+(LJL%s)
+@SP
+A=M-1
+M=-1
+(LJL%s)
+""" % (self.util.getCurrentJumpIndex()-1, self.util.getCurrentJumpIndex(), self.util.getCurrentJumpIndex()-1, self.util.getCurrentJumpIndex()))
+
+
+    def and_(self):
+
+        template = ("""
+%s
+@SP
+A=M
+D=M
+@SP
+M=M-1
+@SP
+A=M
+A=M
+D=D&A
+@SP
+A=M
+M=D
+%s
+""" % (self.util.DecStackPointer(), self.util.IncStackPointer()))
+
+    def or_(self):
+    
+        template = ("""
+%s
+@SP
+A=M
+D=M
+@SP
+M=M-1
+@SP
+A=M
+A=M
+D=D|A
+@SP
+A=M
+M=D
+%s
+""" % (self.util.DecStackPointer(), self.util.IncStackPointer()))
+
+    def not_(self):
+        
+        template = ("""
+%s
+@SP
+A=M
+D=M
+D=!D
+@SP
+A=M
+M=D
+%s
+""" % (self.util.DecStackPointer(), self.util.IncStackPointer()))
 
         return(self.util.fixWhitelines(template))
 
@@ -159,6 +374,12 @@ M=M+1
 M=M-1
 """)
 
+    def getCurrentJumpIndex(self):
+        return(CURRENT_UTIL_JUMP_INDEX)
+
+    def increaseJumpIndex(self):
+        global CURRENT_UTIL_JUMP_INDEX
+        CURRENT_UTIL_JUMP_INDEX += 1
 
     def fixWhitelines(self, text):
         #removes any line with empty lines, would use regex but lazy
