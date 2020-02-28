@@ -1,2 +1,3 @@
-push static 55
-push 45
+label Hello123
+push argument 15
+push local 200

@@ -65,7 +65,6 @@ D=A
 A=M-1
 M=D
 """ % (fileName, value, self.util.IncStackPointer()))
-
         return(self.util.fixWhitelines(template))
 
 #POP:
@@ -74,12 +73,13 @@ M=D
         
         if(loc == "none"):
             template = ("""
-@%d
-D=A
 %s
-A=M-1
+@SP
+A=M
 M=D
-""" % (value, self.util.IncStackPointer()))
+@%d
+M=D
+""" % (self.util.DecStackPointer(), value))
             
         elif(loc == "local"):
             template = ("""
@@ -114,6 +114,13 @@ M=D
 
         return(self.util.fixWhitelines(template))
 
+    def label(self, value):
+        template = ("""
+(%s)
+""" % (value))
+
+        return(self.util.fixWhitelines(template))
+
 #class of utils that will be used in many differnet vm code chunks
 class Utils:
     def IncStackPointer(self):
@@ -121,6 +128,13 @@ class Utils:
 @SP
 M=M+1
 """)
+
+    def DecStackPointer(self):
+        return("""
+@SP
+M=M-1
+""")
+
 
     def fixWhitelines(self, text):
         #removes any line with empty lines, would use regex but lazy

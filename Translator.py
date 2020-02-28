@@ -7,6 +7,7 @@ sourceFile = "source.vm"
 #cmd constants(could use a dictionary as well)
 PUSH = "push"
 POP = "pop"
+LABEL = "label"
 
 class Parser:
     def type(self, line):
@@ -82,6 +83,11 @@ class Translator:
                 
                     translated = translated + self.dictionary.pop(vals[1])
 
+            elif(self.parser.type(line)[0] == LABEL):
+                #We know we just will have label then the value always
+                vals[1] = (self.parser.values(line)[1])
+
+                translated = translated + self.dictionary.label(vals[1])
 
         return(translated)
     
