@@ -8,6 +8,9 @@ sourceFile = "source.vm"
 PUSH = "push"
 POP = "pop"
 LABEL = "label"
+ADD = "add"
+SUB = "sub"
+
 
 class Parser:
     def type(self, line):

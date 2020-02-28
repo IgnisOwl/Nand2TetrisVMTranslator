@@ -28,7 +28,7 @@ class Dictionary:
         
         if(loc == "none"):
             template = ("""
-@%d
+@%s
 D=A
 %s
 A=M-1
@@ -37,7 +37,7 @@ M=D
             
         elif(loc == "local"):
             template = ("""
-@%d
+@%s
 D=A
 @LCL
 D=M
@@ -48,7 +48,7 @@ M=D
             
         elif(loc == "argument"):
             template = ("""
-@%d
+@%s
 D=A
 @ARG
 D=M
@@ -59,7 +59,7 @@ M=D
             
         elif(loc == "static"):
             template = ("""
-@%s.%d
+@%s.%s
 D=A
 %s
 A=M-1
@@ -70,6 +70,7 @@ M=D
 #POP:
     def pop(self, value, loc = "none", fileName = "Source"):
         loc = loc.lower()
+        value = str(value)
         
         if(loc == "none"):
             template = ("""
@@ -77,40 +78,63 @@ M=D
 @SP
 A=M
 M=D
-@%d
+@%s
 M=D
 """ % (self.util.DecStackPointer(), value))
             
         elif(loc == "local"):
             template = ("""
-@%d
+%s
+@%s
 D=A
 @LCL
-D=M
-%s
-A=M-1
+A=M
+D=D+A
+@R13
 M=D
-""" % (value, self.util.IncStackPointer()))
+@SP
+A=M
+D=M
+@R13
+A=M
+M=D
+""" % (self.util.IncStackPointer(), value))
             
         elif(loc == "argument"):
             template = ("""
-@%d
+%s
+@%s
 D=A
 @ARG
-D=M
-%s
-A=M-1
+A=M
+D=D+A
+@R13
 M=D
-""" % (value, self.util.IncStackPointer()))
+@SP
+A=M
+D=M
+@R13
+A=M
+M=D
+""" % (self.util.IncStackPointer(), value))
             
         elif(loc == "static"):
             template = ("""
-@%s.%d
-D=A
 %s
-A=M-1
+@%s.%s
+D=A
+@ARG
+A=M
+D=D+A
+@R13
 M=D
-""" % (fileName, value, self.util.IncStackPointer()))
+@SP
+A=M
+D=M
+@R13
+A=M
+M=D
+""" % (self.util.IncStackPointer(), fileName, value))
 
         return(self.util.fixWhitelines(template))
 
