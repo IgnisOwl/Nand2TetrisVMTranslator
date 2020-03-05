@@ -2,7 +2,7 @@
 
 import TranslationDictionary
 
-sourceFile = "source.vm"
+sourceFile = "source"
 
 #cmd constants(could use a dictionary as well)
 PUSH = "push"
@@ -74,7 +74,7 @@ class Translator:
         newLine = "\n"
     
         for line in source:
-            vals = ["Source", 0, None] #holds values Filename, target, subtype(for like pushing if its for example a static local etc)
+            vals = [sourceFile, 0, None] #holds values Filename, target, subtype(for like pushing if its for example a static local etc)
             if(self.parser.type(line)[0] == PUSH):
                 if(self.parser.type(line)[1] != None): #if like local static etc...
                     vals[1] = (self.parser.values(line)[2])
@@ -135,6 +135,8 @@ class Translator:
         return(translated + self.dictionary.util.programSuffix())
     
                
-source = open(sourceFile, "r").readlines()
+out = open(sourceFile+".asm", "w")
+source = open(sourceFile+".vm", "r").readlines()
 translator = Translator()
-print(translator.translate(source))
+out.write(translator.translate(source))
+out.close()
