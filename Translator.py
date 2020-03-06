@@ -19,6 +19,9 @@ LESS_THAN = "lt"
 AND = "and"
 OR = "or"
 NOT = "not"
+#jumping
+JUMP = "goto"
+JUMP_IF = "if-goto"
 
 class Parser:
     def type(self, line):
@@ -75,6 +78,7 @@ class Translator:
     
         for line in source:
             vals = [sourceFile, 0, None] #holds values Filename, target, subtype(for like pushing if its for example a static local etc)
+
             if(self.parser.type(line)[0] == PUSH):
                 if(self.parser.type(line)[1] != None): #if like local static etc...
                     vals[1] = (self.parser.values(line)[2])
@@ -129,6 +133,14 @@ class Translator:
 
             elif(self.parser.type(line)[0] == NOT):
                 translated = translated + self.dictionary.not_()
+
+            elif(self.parser.type(line)[0] == JUMP):
+                vals[1] = (self.parser.values(line)[1])
+                
+                translated = translated + self.dictionary.jump(vals[1])
+
+            elif(self.parser.type(line)[0] == JUMP_IF):
+                translated = translated + self.dictionary.jump_if()
 
 
 

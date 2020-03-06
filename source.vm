@@ -1,3 +1,5 @@
+label why
 push constant 15
 push temp 12
 not
+goto why

@@ -231,7 +231,7 @@ M=D
 
     def eq(self):
         self.util.increaseJumpIndex()
-        #note: lgl stands for logic jump label
+        #note: $lgl stands for logic jump label, the $ is because that it isn't allowed in vm language labels, so no one accientally overwrites it
         template = ("""
 @SP
 M=M-1
@@ -239,18 +239,18 @@ A=M
 D=M
 A=A-1
 D=M-D
-@LJL%s
+@$LJL%s
 D;JEQ
 @SP
 A=M-1
 M=0
-@LJL%s
+@$LJL%s
 0;JMP
-(LJL%s)
+($LJL%s)
 @SP
 A=M-1
 M=-1
-(LJL%s)
+($LJL%s)
 """ % (self.util.getCurrentJumpIndex()-1, self.util.getCurrentJumpIndex(), self.util.getCurrentJumpIndex()-1, self.util.getCurrentJumpIndex()))
 
         return(self.util.fixWhitelines(template))
@@ -265,18 +265,18 @@ A=M
 D=M
 A=A-1
 D=M-D
-@LJL%s
+@$LJL%s
 D;JGT
 @SP
 A=M-1
 M=0
-@LJL%s
+@$$LJL%s
 0;JMP
-(LJL%s)
+($LJL%s)
 @SP
 A=M-1
 M=-1
-(LJL%s)
+($LJL%s)
 """ % (self.util.getCurrentJumpIndex()-1, self.util.getCurrentJumpIndex(), self.util.getCurrentJumpIndex()-1, self.util.getCurrentJumpIndex()))
 
         return(self.util.fixWhitelines(template))
@@ -291,21 +291,22 @@ A=M
 D=M
 A=A-1
 D=M-D
-@LJL%s
+@$LJL%s
 D;JLT
 @SP
 A=M-1
 M=0
-@LJL%s
+@$LJL%s
 0;JMP
-(LJL%s)
+($LJL%s)
 @SP
 A=M-1
 M=-1
-(LJL%s)
+($LJL%s)
 """ % (self.util.getCurrentJumpIndex()-1, self.util.getCurrentJumpIndex(), self.util.getCurrentJumpIndex()-1, self.util.getCurrentJumpIndex()))
 
-
+        return(self.util.fixWhitelines(template))
+    
     def and_(self):
 
         template = ("""
@@ -343,6 +344,8 @@ A=M
 M=D
 %s
 """ % (self.util.DecStackPointer(), self.util.IncStackPointer()))
+        
+        return(self.util.fixWhitelines(template))
 
     def not_(self):
         
@@ -357,6 +360,15 @@ A=M
 M=D
 %s
 """ % (self.util.DecStackPointer(), self.util.IncStackPointer()))
+
+        return(self.util.fixWhitelines(template))
+
+    def jump(self, dest):
+        
+        template = ("""
+@%s
+0;JMP
+""" % (dest))
 
         return(self.util.fixWhitelines(template))
 

@@ -1,3 +1,5 @@
+(why)
+//next instruction
 @15
 D=A
 @SP
@@ -26,6 +28,9 @@ A=M
 M=D
 @SP
 M=M+1
+//next instruction
+@why
+0;JMP
 //next instruction
 (END)
 @END
