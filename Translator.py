@@ -140,7 +140,9 @@ class Translator:
                 translated = translated + self.dictionary.jump(vals[1])
 
             elif(self.parser.type(line)[0] == JUMP_IF):
-                translated = translated + self.dictionary.jump_if()
+                vals[1] = (self.parser.values(line)[1])
+                
+                translated = translated + self.dictionary.jump_if(vals[1])
 
 
 

@@ -29,8 +29,13 @@ M=D
 @SP
 M=M+1
 //next instruction
+@SP
+M=M+1
+@SP
+A=M
+D=M
 @why
-0;JMP
+D;JNE
 //next instruction
 (END)
 @END

@@ -372,6 +372,19 @@ M=D
 
         return(self.util.fixWhitelines(template))
 
+    def jump_if(self, dest): #val is top of stack
+        
+        template = ("""
+%s
+@SP
+A=M
+D=M
+@%s
+D;JNE
+""" % (self.util.IncStackPointer(), dest))
+
+        return(self.util.fixWhitelines(template))
+
 #class of utils that will be used in many differnet vm code chunks
 class Utils:
     def IncStackPointer(self):
