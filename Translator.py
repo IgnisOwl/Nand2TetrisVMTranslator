@@ -22,6 +22,9 @@ NOT = "not"
 #jumping
 JUMP = "goto"
 JUMP_IF = "if-goto"
+#subroutines
+CALL_SUBROUTINE = "call"
+CREATE_SUBROUTINE = "function"
 
 class Parser:
     def type(self, line):
@@ -42,6 +45,8 @@ class Parser:
             elif(cmd == POP):
                 popT = line[1]
                 return(cmd, popT)
+
+        return(cmd, None)
 
     def split(self, line): #splits a line based on whitespaces
         return(line.split())
@@ -78,7 +83,8 @@ class Translator:
     
         for line in source:
             vals = [sourceFile, 0, None] #holds values Filename, target, subtype(for like pushing if its for example a static local etc)
-
+            subroutine_parameters = [] #holds list of subroutine paramaters we are focusing on
+            
             if(self.parser.type(line)[0] == PUSH):
                 if(self.parser.type(line)[1] != None): #if like local static etc...
                     vals[1] = (self.parser.values(line)[2])
@@ -143,6 +149,17 @@ class Translator:
                 vals[1] = (self.parser.values(line)[1])
                 
                 translated = translated + self.dictionary.jump_if(vals[1])
+
+            elif(self.parser.type(line)[0] == CREATE_SUBROUTINE):
+                #We can have as many parameters as we want so we have to iterate through all the values
+
+                valTmp = self.parser.values(line)
+
+                for value in valTmp:
+                    subroutine_parameters.append(value)
+
+            elif(self.parser.type(line)[0] == CALL_SUBROUTINE):
+                pass
 
 
 

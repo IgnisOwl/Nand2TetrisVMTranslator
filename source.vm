@@ -3,3 +3,4 @@ push constant 15
 push temp 12
 not
 if-goto why
+function 15 a chm
