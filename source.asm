@@ -1,12 +1,12 @@
 (why)
-//next instruction
+//next_instruction
 @15
 D=A
 @SP
 M=M+1
 A=M-1
 M=D
-//next instruction
+//next_instruction
 @5
 D=A
 @12
@@ -16,7 +16,7 @@ D=M
 M=M+1
 A=M-1
 M=D
-//next instruction
+//next_instruction
 @SP
 M=M-1
 @SP
@@ -28,7 +28,7 @@ A=M
 M=D
 @SP
 M=M+1
-//next instruction
+//next_instruction
 @SP
 M=M+1
 @SP
@@ -36,7 +36,29 @@ A=M
 D=M
 @why
 D;JNE
-//next instruction
+//next_instruction
+@abc
+D=A
+@SP
+M=M+1
+A=M-1
+M=D
+//next_instruction
+@123
+D=A
+@SP
+M=M+1
+A=M-1
+M=D
+@SP
+M=M+1
+@SP
+A=M
+D=M
+@['abc',
+123]
+D;JNE
+//next_instruction
 (END)
 @END
 0;JMP

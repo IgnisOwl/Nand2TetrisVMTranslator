@@ -83,7 +83,6 @@ class Translator:
     
         for line in source:
             vals = [sourceFile, 0, None] #holds values Filename, target, subtype(for like pushing if its for example a static local etc)
-            subroutine_parameters = [] #holds list of subroutine paramaters we are focusing on
             
             if(self.parser.type(line)[0] == PUSH):
                 if(self.parser.type(line)[1] != None): #if like local static etc...
@@ -153,13 +152,23 @@ class Translator:
             elif(self.parser.type(line)[0] == CREATE_SUBROUTINE):
                 #We can have as many parameters as we want so we have to iterate through all the values
 
+                subroutine_parameters = [] #holds list of subroutine paramaters we are focusing on
                 valTmp = self.parser.values(line)
 
                 for value in valTmp:
                     subroutine_parameters.append(value)
 
+                translated = translated + self.dictionary.subroutine(subroutine_parameters)
+
             elif(self.parser.type(line)[0] == CALL_SUBROUTINE):
-                pass
+                args = [] #arguments to pass
+                valTmp = self.parser.values(line)
+                function_name = valTmp[1] #function name
+
+                for value in valTmp[2:len(valTmp)]:
+                    args.append(value)
+
+                translated = translated + self.dictionary.call_subroutine(function_name,args)
 
 
 

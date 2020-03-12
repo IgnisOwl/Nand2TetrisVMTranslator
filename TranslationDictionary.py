@@ -1,6 +1,6 @@
 #this is a list of translation temlates for different vm codes
 
-END_INSTRUCTION_CHAR = "\n//next instruction\n"
+END_INSTRUCTION_CHAR = "\n//next_instruction\n"
 CURRENT_UTIL_JUMP_INDEX = 0 #used for stuff like logic labels
 
 #NOTE: these are not at all the most efficient ways of doing things, also I could probably make it so some more work is done in the translator, such as with popping and pushing the pointers having the translator figure out the ram[offset+3] instead of it being handled by the assembler
@@ -385,6 +385,44 @@ D;JNE
 
         return(self.util.fixWhitelines(template))
 
+    def create_subroutine(self, args):
+
+        template = ("""
+%s
+@SP
+A=M
+D=M
+@%s
+D;JNE
+""" % (self.util.IncStackPointer(), dest))
+
+        return(self.util.fixWhitelines(template))
+
+
+    def call_subroutine(self, subroutine, args):
+        template = ""
+        
+        #for every argument, we have to push it onto the stack
+        for arg in args:
+            template = template + self.push(arg, "constant")
+
+        #remove the indent at the end and the //next instruction, but keep the indent so it will retain it nex ttime
+        template = template[0:len(template)-(len(END_INSTRUCTION_CHAR))]
+
+        
+        template = template + ("""
+%s
+@SP
+A=M
+D=M
+@%s
+D;JNE
+""" % (self.util.IncStackPointer(), args))
+
+        print(self.util.fixWhitelines(template))
+
+        return(self.util.fixWhitelines(template))
+
 #class of utils that will be used in many differnet vm code chunks
 class Utils:
     def IncStackPointer(self):
@@ -418,6 +456,7 @@ M=M-1
 
         #the suffic:
         newText = newText + END_INSTRUCTION_CHAR
+        
         return(newText)
 
     def programSuffix(self):
