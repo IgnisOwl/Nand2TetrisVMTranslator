@@ -281,7 +281,7 @@ M=-1
 
         return(self.util.fixWhitelines(template))
 
-    def greater_than(self):
+    def less_than(self):
         self.util.increaseJumpIndex()
 
         template = ("""
@@ -529,9 +529,7 @@ D=M
 M=D
 @%s
 0;JMP
-($SJL%s) """ % (self.util.getCurrentJumpIndex(), args+5, subroutine_name, self.util.getCurrentJumpIndex()) #The reason we do args+5 is because we are setting arg, remember ARG=SP-n-5, with n being number of args.(the subtraction from sp is handled by the assembler, but we are handling n and 5) SJL stands for subroutine jump label
-
-        print(self.util.fixWhitelines(template))
+($SJL%s) """ % (self.util.getCurrentJumpIndex(), args+5, subroutine_name, self.util.getCurrentJumpIndex())) #The reason we do args+5 is because we are setting arg, remember ARG=SP-n-5, with n being number of args.(the subtraction from sp is handled by the assembler, but we are handling n and 5) SJL stands for subroutine jump label
 
         return(self.util.fixWhitelines(template))
 
