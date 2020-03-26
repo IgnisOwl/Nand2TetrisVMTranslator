@@ -385,39 +385,151 @@ D;JNE
 
         return(self.util.fixWhitelines(template))
 
-    def create_subroutine(self, args):
+    def create_subroutine(self, subroutine_name, localVariables):
+        template = ""
 
-        template = ("""
-%s
+        #first, we need to declare the function start:
+        template = template + ("""(%s)
+""" % subroutine_name)
+        #handle each local variable we want with a for loop:
+        for i in range(localVariables): #we must initialize all these local variables to 0, aka push 0 that many times
+            template = template + ("""@0
+D=A
 @SP
 A=M
-D=M
-@%s
-D;JNE
-""" % (self.util.IncStackPointer(), dest))
+M=D
+%s""" % self.util.IncStackPointer())
 
         return(self.util.fixWhitelines(template))
 
+    def return_subroutine(self):
 
-    def call_subroutine(self, subroutine, args):
-        template = ""
-        
-        #for every argument, we have to push it onto the stack
-        for arg in args:
-            template = template + self.push(arg, "constant")
-
-        #remove the indent at the end and the //next instruction, but keep the indent so it will retain it nex ttime
-        template = template[0:len(template)-(len(END_INSTRUCTION_CHAR))]
-
-        
-        template = template + ("""
-%s
+        #R1 = mem[1] which is local, we are then setting frame to this whichw e will use later
+        #R14 = temporary var, we will put the return address in here. Frame - 5, which would be the return address/ We are using r13 for the computation of frame-5
+        #We have to set things to how they were before so first we have to set the data at ARG(amount of arguments) to value pop returns
+        #after this we restore all the other stuff such as SP(just arg+1), THAT(frame-1), THIS(frame-2), etc..
+        #finally we jump to the return address that the caller provided
+        template = ("""
+@R1
+D=M
+@R13
+M=D
+@5
+A=D-A
+D=M
+@R14
+M=D
+@SP
+M=M-1
+@ARG
+AD=M
+@R15
+M=D
 @SP
 A=M
 D=M
+@R15
+A=M
+M=D
+@R2
+D=M
+@R0
+M=D+1
+@R13
+D=M
+D=D-1
+@R13
+M=D
+A=D
+D=M
+@R4
+M=D
+@R13
+D=M
+D=D-1
+@R13
+M=D
+A=D
+D=M
+@R3
+M=D
+@R13
+D=M
+D=D-1
+@R13
+M=D
+A=D
+D=M
+@R2
+M=D
+@R13
+D=M
+D=D-1
+@R13
+M=D
+A=D
+D=M
+@R1
+M=D
+@R14
+A=M
+0;JMP
+""")
+        return(self.util.fixWhitelines(template))
+
+
+    def call_subroutine(self, subroutine_name, args):
+        self.util.increaseJumpIndex()
+        template = ("""
+@$SJL%s
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@R1
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@R2
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@R3
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@R4
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
 @%s
-D;JNE
-""" % (self.util.IncStackPointer(), args))
+D=A
+@R0
+A=M
+AD=A-D
+@R2
+M=D
+@R0
+D=M
+@R1
+M=D
+@%s
+0;JMP
+($SJL%s) """ % (self.util.getCurrentJumpIndex(), args+5, subroutine_name, self.util.getCurrentJumpIndex()) #The reason we do args+5 is because we are setting arg, remember ARG=SP-n-5, with n being number of args.(the subtraction from sp is handled by the assembler, but we are handling n and 5) SJL stands for subroutine jump label
 
         print(self.util.fixWhitelines(template))
 
@@ -426,14 +538,12 @@ D;JNE
 #class of utils that will be used in many differnet vm code chunks
 class Utils:
     def IncStackPointer(self):
-        return("""
-@SP
+        return("""@SP
 M=M+1
 """)
 
     def DecStackPointer(self):
-        return("""
-@SP
+        return("""@SP
 M=M-1
 """)
 

@@ -25,6 +25,7 @@ JUMP_IF = "if-goto"
 #subroutines
 CALL_SUBROUTINE = "call"
 CREATE_SUBROUTINE = "function"
+RETURN_SUBROUTINE = "return"
 
 class Parser:
     def type(self, line):
@@ -150,25 +151,23 @@ class Translator:
                 translated = translated + self.dictionary.jump_if(vals[1])
 
             elif(self.parser.type(line)[0] == CREATE_SUBROUTINE):
-                #We can have as many parameters as we want so we have to iterate through all the values
+                #We have to put the amount of parameters we want after like so: function testing123 5 would make 5 parameters
 
-                subroutine_parameters = [] #holds list of subroutine paramaters we are focusing on
-                valTmp = self.parser.values(line)
+                val = self.parser.values(line)
 
-                for value in valTmp:
-                    subroutine_parameters.append(value)
 
-                translated = translated + self.dictionary.subroutine(subroutine_parameters)
+                translated = translated + self.dictionary.create_subroutine(val[1], val[2]) #name, amount of local variables
 
+            elif(self.parser.type(line)[0] == RETURN_SUBROUTINE):
+
+                translated = translated + self.dictionary.return_subroutine()
+
+
+                translated = translated + self.dictionary.create_subroutine(val[1], val[2])
             elif(self.parser.type(line)[0] == CALL_SUBROUTINE):
-                args = [] #arguments to pass
-                valTmp = self.parser.values(line)
-                function_name = valTmp[1] #function name
+                vals = self.parser.values(line)
 
-                for value in valTmp[2:len(valTmp)]:
-                    args.append(value)
-
-                translated = translated + self.dictionary.call_subroutine(function_name,args)
+                translated = translated + self.dictionary.call_subroutine(vals[1], vals[2]) #name, amount of local variables
 
 
 
